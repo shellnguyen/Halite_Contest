@@ -25,11 +25,24 @@ namespace hlt {
 
 			int n_ships = other.ships.at(i).size();
 			ship_vec.reserve(n_ships);
-			for (int j = 0; j < n_ships; ++j) {
+			for (int j = 0; j < n_ships; ++j) 
+			{
 				hlt::Ship s = Ship(other.ships.at(i).at(j));
 				ship_vec.push_back(s);
 				ship_e_map[s.entity_id] = j;
 			}
 		}
+
+		//Need to figure out a way to merge in_range_enemies/alllies
+		//for (int i = 0; i < other.ships.size(); ++i)
+		//{
+		//	for (hlt::Ship& s : this->ships.at(i))
+		//	{
+		//		for (int j = 0; j < s.in_range_enemies.size(); ++j)
+		//		{
+		//			const hlt::Ship enemyShip = this->get_ship(s.in_range_enemies[j].owner_id, s.in_range_enemies[j].entity_id);
+		//		}
+		//	}
+		//}
 	}
 }

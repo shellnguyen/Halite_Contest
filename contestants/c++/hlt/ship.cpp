@@ -31,4 +31,14 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 	{
 		this->current_state = other.current_state;
 	}
+
+	if (other.in_range_enemies.size() > 0)
+	{
+		this->in_range_enemies.assign(other.in_range_enemies.begin(), other.in_range_enemies.end());
+	}
+
+	if (other.in_range_allies.size() > 0)
+	{
+		this->in_range_allies.assign(other.in_range_allies.begin(), other.in_range_allies.end());
+	}
 }

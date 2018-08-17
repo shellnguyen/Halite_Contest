@@ -36,6 +36,9 @@ namespace hlt {
 		Entity* current_target;
 		State* current_state;
 
+		std::vector<hlt::Ship> in_range_enemies;
+		std::vector<hlt::Ship> in_range_allies;
+
 		Ship();
 		Ship(const Ship& other);
     };

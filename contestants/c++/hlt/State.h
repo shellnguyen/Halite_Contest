@@ -8,7 +8,7 @@ protected:
 public:
 	unsigned int stateIndex;
 	virtual State* getNextState() = 0;
-	virtual bool Behaviour() = 0;
+	virtual bool behavior() = 0;
 };
 
 #endif // !STATE_H
