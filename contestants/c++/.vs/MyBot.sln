@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyBot", "F:\Me\AI_Contest\contestants\c++\.vs\MyBot.vcxproj", "{50E0B30D-BCF4-DBBE-8576-7F1EF149D8EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50E0B30D-BCF4-DBBE-8576-7F1EF149D8EF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{50E0B30D-BCF4-DBBE-8576-7F1EF149D8EF}.Debug|Win32.Build.0 = Debug|Win32
+		{50E0B30D-BCF4-DBBE-8576-7F1EF149D8EF}.Release|Win32.ActiveCfg = Release|Win32
+		{50E0B30D-BCF4-DBBE-8576-7F1EF149D8EF}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

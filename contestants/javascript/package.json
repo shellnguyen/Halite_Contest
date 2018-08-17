@@ -1,0 +1,14 @@
+{
+  "name": "contestant-client",
+  "description": "SA2 AI Championship",
+  "version": "1.0.0",
+  "author": "Hai Bacti",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "release": "%NODE_PATH%/.bin/cross-env NODE_ENV=production %NODE_PATH%/.bin/webpack --progress --profile --colors",
+    "mac-release": "$NODE_PATH/.bin/cross-env NODE_ENV=production $NODE_PATH/.bin/webpack --progress --profile --colors",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {}
+}
