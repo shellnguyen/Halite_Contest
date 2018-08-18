@@ -32,17 +32,5 @@ namespace hlt {
 				ship_e_map[s.entity_id] = j;
 			}
 		}
-
-		//Need to figure out a way to merge in_range_enemies/alllies
-		//for (int i = 0; i < other.ships.size(); ++i)
-		//{
-		//	for (hlt::Ship& s : this->ships.at(i))
-		//	{
-		//		for (int j = 0; j < s.in_range_enemies.size(); ++j)
-		//		{
-		//			const hlt::Ship enemyShip = this->get_ship(s.in_range_enemies[j].owner_id, s.in_range_enemies[j].entity_id);
-		//		}
-		//	}
-		//}
 	}
 }
