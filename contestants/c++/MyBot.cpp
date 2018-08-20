@@ -5,12 +5,11 @@
 bool IsPlayerShip(const hlt::Map map, const hlt::EntityId entityId, const hlt::PlayerId playerId);
 int GetNumberOfSurroundShips(const std::vector<hlt::Ship> ships, const hlt::Entity entity);
 int GetNumberOfEnemyShips(const hlt::Map map, const hlt::Planet planet, hlt::PlayerId player_id);
-void UpdateEntityLists();
 
 int main()
 {
     const hlt::Metadata metadata = hlt::initialize("LegendaryShell");
-    const hlt::PlayerId player_id = metadata.player_id;
+	player_id = metadata.player_id;
 
     const hlt::Map& initial_map = metadata.initial_map;
 
@@ -29,16 +28,25 @@ int main()
         moves.clear();
         hlt::Map map = hlt::in::get_map();
 		game_map = &map;
-		UpdateEntityLists();
+		UpdatePlanetList();
+		UpdateShipList();
+		//UpdateNearbyShip();
 
-        for (const hlt::Ship& ship : game_map->ships.at(player_id))
+        for (hlt::Ship ship : player_ships)
 		{
             if (ship.docking_status != hlt::ShipDockingStatus::Undocked) 
 			{
                 continue;
             }
 
-			const hlt::Planet nearestPlanet = GetNearestPlanet(*game_map, ship);
+			if (!ship.current_state)
+			{
+				ship.current_state = new Idle();
+			}
+
+			//ship.action();
+
+			const hlt::Planet nearestPlanet = GetNearestPlanet(ship);
 
 			//if (nearestPlanet.entity_id != -1)
 			//{
@@ -69,15 +77,18 @@ int main()
 			{
 				if (ship.can_dock(nearestPlanet))
 				{
+					hlt::Log::log("can dock");
 					if (!nearestPlanet.is_full() && (nearestPlanet.owner_id == player_id || !nearestPlanet.owned))
 					{
+						hlt::Log::log("1");
 						moves.push_back(hlt::Move::dock(ship.entity_id, nearestPlanet.entity_id));
 						continue;
 					}
 					else
 					{
-						hlt::Ship nearestEnemyShip = GetNearestEnemyShip(*game_map, ship);
-						if (nearestEnemyShip.health > ship.health && nearestEnemyShip.docking_status == hlt::ShipDockingStatus::Undocked)
+						hlt::Log::log("2");
+						hlt::Ship nearestEnemyShip = GetNearestEnemyShip(ship);
+						if ((nearestEnemyShip.health > ship.health) && nearestEnemyShip.docking_status == hlt::ShipDockingStatus::Undocked)
 						{
 							const hlt::possibly<hlt::Move> suicideAttack = hlt::navigation::navigate_ship_towards_target(*game_map, ship, nearestEnemyShip.location, hlt::constants::MAX_SPEED, true, 90, 1);
 							if (suicideAttack.second)
@@ -99,10 +110,15 @@ int main()
 					}
 				}
 
+				hlt::Log::log("can not dock");
 				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestPlanet, hlt::constants::MAX_SPEED);
 				if (move.second)
 				{
 					moves.push_back(move.first);
+				}
+				else
+				{
+					hlt::Log::log("can't move to dock");
 				}
 			}
 			else
@@ -172,9 +188,4 @@ bool IsPlayerShip(const hlt::Map map, const hlt::EntityId entityId, const hlt::P
 	}
 
 	return false;
-}
-
-void UpdateEntityLists()
-{
-
 }

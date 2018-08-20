@@ -3,7 +3,8 @@
 #include "constants.hpp"
 #include "types.hpp"
 #include "planet.hpp"
-#include "State.h"
+
+class State;
 
 namespace hlt {
     /// The states a ship can be in regarding docking.
@@ -32,8 +33,8 @@ namespace hlt {
             return location.get_distance_to(planet.location) <= (constants::SHIP_RADIUS + constants::DOCK_RADIUS + planet.radius);
         }
 
-		Entity* last_target;
-		Entity* current_target;
+		//Entity* last_target;
+		//Entity* current_target;
 		State* current_state;
 
 		std::vector<hlt::Ship> in_range_enemies;
@@ -41,5 +42,7 @@ namespace hlt {
 
 		Ship();
 		Ship(const Ship& other);
+
+		void action();
     };
 }
