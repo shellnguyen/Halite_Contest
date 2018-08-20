@@ -11,7 +11,7 @@ public:
 	Moving();
 	int getStateIndex() const override;
 	State* getNextState() override;
-	void behavior(const hlt::Ship s) override;
+	bool behavior(hlt::Ship* s) override;
 };
 
 #endif // !MOVING_H

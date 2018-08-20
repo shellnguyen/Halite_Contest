@@ -34,7 +34,7 @@ namespace hlt {
         }
 
 		//Entity* last_target;
-		//Entity* current_target;
+		Entity* current_target;
 		State* current_state;
 
 		std::vector<hlt::Ship> in_range_enemies;
@@ -44,5 +44,9 @@ namespace hlt {
 		Ship(const Ship& other);
 
 		void action();
+		int getType() override 
+		{
+			return 1;
+		}
     };
 }

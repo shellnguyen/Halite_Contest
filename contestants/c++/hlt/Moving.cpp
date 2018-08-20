@@ -29,7 +29,18 @@ State* Moving::getNextState()
 	}
 }
 
-void Moving::behavior(const hlt::Ship s)
+bool Moving::behavior(hlt::Ship* s)
 {
+	if (s->current_target->getType() == 1)
+	{
 
+	}
+	else
+	{
+		hlt::Planet* current_target = dynamic_cast<hlt::Planet*>(s->current_target);
+
+
+	}
+
+	return false;
 }

@@ -23,7 +23,7 @@ int main()
             << "; planets: " << initial_map.planets.size();
     hlt::Log::log(initial_map_intelligence.str());
 
-    std::vector<hlt::Move> moves;
+
     for (;;) {
         moves.clear();
         hlt::Map map = hlt::in::get_map();
@@ -41,12 +41,14 @@ int main()
 
 			if (!ship.current_state)
 			{
+				hlt::Log::log("current state = Idle");
 				ship.current_state = new Idle();
 			}
 
-			//ship.action();
+			hlt::Log::log("start action");
+			ship.action();
 
-			const hlt::Planet nearestPlanet = GetNearestPlanet(ship);
+			//const hlt::Planet nearestPlanet = GetNearestPlanet(ship);
 
 			//if (nearestPlanet.entity_id != -1)
 			//{
@@ -73,58 +75,58 @@ int main()
 			//	}
 			//}
 
-			if (nearestPlanet.entity_id != -1)
-			{
-				if (ship.can_dock(nearestPlanet))
-				{
-					hlt::Log::log("can dock");
-					if (!nearestPlanet.is_full() && (nearestPlanet.owner_id == player_id || !nearestPlanet.owned))
-					{
-						hlt::Log::log("1");
-						moves.push_back(hlt::Move::dock(ship.entity_id, nearestPlanet.entity_id));
-						continue;
-					}
-					else
-					{
-						hlt::Log::log("2");
-						hlt::Ship nearestEnemyShip = GetNearestEnemyShip(ship);
-						if ((nearestEnemyShip.health > ship.health) && nearestEnemyShip.docking_status == hlt::ShipDockingStatus::Undocked)
-						{
-							const hlt::possibly<hlt::Move> suicideAttack = hlt::navigation::navigate_ship_towards_target(*game_map, ship, nearestEnemyShip.location, hlt::constants::MAX_SPEED, true, 90, 1);
-							if (suicideAttack.second)
-							{
-								moves.push_back(suicideAttack.first);
-								continue;
-							}
-						}
-						else
-						{
-							const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestEnemyShip, hlt::constants::MAX_SPEED);
-							if (move.second)
-							{
-								moves.push_back(move.first);
-								continue;
-							}
-						}
+			//if (nearestPlanet.entity_id != -1)
+			//{
+			//	if (ship.can_dock(nearestPlanet))
+			//	{
+			//		hlt::Log::log("can dock");
+			//		if (!nearestPlanet.is_full() && (nearestPlanet.owner_id == player_id || !nearestPlanet.owned))
+			//		{
+			//			hlt::Log::log("1");
+			//			moves.push_back(hlt::Move::dock(ship.entity_id, nearestPlanet.entity_id));
+			//			continue;
+			//		}
+			//		else
+			//		{
+			//			hlt::Log::log("2");
+			//			hlt::Ship nearestEnemyShip = GetNearestEnemyShip(ship);
+			//			if ((nearestEnemyShip.health > ship.health) && nearestEnemyShip.docking_status == hlt::ShipDockingStatus::Undocked)
+			//			{
+			//				const hlt::possibly<hlt::Move> suicideAttack = hlt::navigation::navigate_ship_towards_target(*game_map, ship, nearestEnemyShip.location, hlt::constants::MAX_SPEED, true, 90, 1);
+			//				if (suicideAttack.second)
+			//				{
+			//					moves.push_back(suicideAttack.first);
+			//					continue;
+			//				}
+			//			}
+			//			else
+			//			{
+			//				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestEnemyShip, hlt::constants::MAX_SPEED);
+			//				if (move.second)
+			//				{
+			//					moves.push_back(move.first);
+			//					continue;
+			//				}
+			//			}
 
-					}
-				}
+			//		}
+			//	}
 
-				hlt::Log::log("can not dock");
-				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestPlanet, hlt::constants::MAX_SPEED);
-				if (move.second)
-				{
-					moves.push_back(move.first);
-				}
-				else
-				{
-					hlt::Log::log("can't move to dock");
-				}
-			}
-			else
-			{
-				hlt::Log::log("-1");
-			}
+			//	hlt::Log::log("can not dock");
+			//	const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestPlanet, hlt::constants::MAX_SPEED);
+			//	if (move.second)
+			//	{
+			//		moves.push_back(move.first);
+			//	}
+			//	else
+			//	{
+			//		hlt::Log::log("can't move to dock");
+			//	}
+			//}
+			//else
+			//{
+			//	hlt::Log::log("-1");
+			//}
         }
 
         if (!hlt::out::send_moves(moves)) 

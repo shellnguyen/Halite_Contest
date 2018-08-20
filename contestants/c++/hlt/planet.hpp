@@ -25,5 +25,10 @@ namespace hlt {
         bool is_full() const {
             return docked_ships.size() == docking_spots;
         }
+
+		int getType() override
+		{
+			return 2;
+		}
     };
 }

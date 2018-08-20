@@ -5,6 +5,7 @@ hlt::PlayerId player_id;
 hlt::Map* game_map;
 std::vector<hlt::Ship> enemy_ships, player_ships;
 std::vector<hlt::Planet> neutral_planets, enemy_planets, player_planets, non_player_planets;
+std::vector<hlt::Move> moves;
 
 //Update all list in begining of turn
 void UpdatePlanetList()

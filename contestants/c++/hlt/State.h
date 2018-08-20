@@ -22,7 +22,7 @@ protected:
 public:
 	virtual int getStateIndex() const = 0;
 	virtual State* getNextState() = 0;
-	virtual void behavior(const hlt::Ship s) = 0;
+	virtual bool behavior(hlt::Ship* s) = 0;
 };
 
 #endif // !STATE_H
