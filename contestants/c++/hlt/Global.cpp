@@ -102,36 +102,38 @@ void UpdateNearbyShip()
 //Logic function
 struct ComparePlanetDistance
 {
-	const hlt::Ship ship;
+	hlt::Ship* ship;
 	bool operator()(hlt::Planet p1, hlt::Planet p2)
 	{
-		return (ship.location.get_distance_to(p1.location) < ship.location.get_distance_to(p2.location));
+		return (ship->location.get_distance_to(p1.location) < ship->location.get_distance_to(p2.location));
 	}
-	ComparePlanetDistance(const hlt::Ship ship) : ship(ship) {};
+	ComparePlanetDistance(hlt::Ship* ship) : ship(ship) {};
 };
 
 struct CompareShipDistance
 {
-	const hlt::Ship playerShip;
-	CompareShipDistance(const hlt::Ship ship) : playerShip(ship) {};
+	hlt::Ship* playerShip;
+	CompareShipDistance(hlt::Ship* ship) : playerShip(ship) {};
 
 	bool operator()(hlt::Ship s1, hlt::Ship s2)
 	{
-		return (playerShip.location.get_distance_to(s1.location) < playerShip.location.get_distance_to(s2.location));
+		return (playerShip->location.get_distance_to(s1.location) < playerShip->location.get_distance_to(s2.location));
 	}
 };
 
-hlt::Planet GetNearestPlanet(const hlt::Ship ship)
+hlt::Planet GetNearestPlanet(hlt::Ship* ship)
 {
+	hlt::Log::log("GetNearestPlanet");
 	ComparePlanetDistance comp(ship);
 	//std::sort(non_player_planets.begin(), non_player_planets.end(), [ship](hlt::Planet* a, hlt::Planet* b) { return a->location.get_distance_to(ship.location) < b->location.get_distance_to(ship.location); });
 
 	std::sort(game_map->planets.begin(), game_map->planets.end(), comp);
+	hlt::Log::log("huhuhuh");
 
 	for (const hlt::Planet& planet : game_map->planets)
 	{
 		hlt::Log::log("check planet");
-		if ((planet.owner_id == ship.owner_id) && planet.is_full())
+		if ((planet.owner_id == ship->owner_id) && planet.is_full())
 		{
 			hlt::Log::log("continue");
 			continue;
@@ -146,7 +148,7 @@ hlt::Planet GetNearestPlanet(const hlt::Ship ship)
 	return noPlanet;
 }
 
-hlt::Ship GetNearestEnemyShip(const hlt::Ship myShip)
+hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 {
 	CompareShipDistance comp(myShip);
 	//std::sort(enemy_ships.begin(), enemy_ships.end(), [myShip](hlt::Ship* a, hlt::Ship* b) { return a->location.get_distance_to(myShip->location) < b->location.get_distance_to(myShip->location); });

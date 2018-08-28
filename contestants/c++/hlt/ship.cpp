@@ -1,5 +1,12 @@
 #include "ship.hpp"
 #include "State.h"
+#include "Docking.h"
+#include "log.hpp"
+#include "Idle.h"
+#include "Engaging.h"
+#include "Avoiding.h"
+#include "Moving.h"
+#include "hlt.hpp"
 
 hlt::Ship::Ship() : Entity()
 {
@@ -45,10 +52,42 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 	//}
 }
 
+hlt::Ship::~Ship()
+{
+	delete current_target;
+	delete current_state;
+}
+
 void hlt::Ship::action()
 {
 	if (this->current_state->behavior(this))
 	{
-		this->current_state = this->current_state->getNextState();
+		hlt::Log::log("Time to move to next state");
+		int nextState = this->current_state->getNextState();
+		hlt::Log::log("nextState = " + to_string(nextState));
+		switch (nextState)
+		{
+			case STATE::IDLE:
+				this->current_state = new Idle();
+				hlt::Log::log("next state = idle");
+				break;
+			case STATE::DOCKING:
+				this->current_state = new Docking();
+				hlt::Log::log("next state = docking");
+				break;
+			case STATE::MOVING:
+				this->current_state = new Moving();
+				hlt::Log::log("next state = moving");
+				break;
+			case STATE::ENGAGING:
+				this->current_state = new Engaging();
+				hlt::Log::log("next state = engaging");
+				break;
+			case STATE::AVOIDING:
+				this->current_state = new Avoiding();
+				hlt::Log::log("next state = avoiding");
+				break;
+		}
+		hlt::Log::log("next state success");
 	}
 }

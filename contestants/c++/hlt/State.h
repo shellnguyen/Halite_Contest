@@ -1,6 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include "hlt.hpp"
+
 namespace hlt
 {
 	struct Ship;
@@ -19,9 +21,11 @@ class State
 {
 protected:
 	unsigned int m_stateIndex;
+	int m_nextState;
 public:
+	virtual ~State() { hlt::Log::log("delete State"); };
 	virtual int getStateIndex() const = 0;
-	virtual State* getNextState() = 0;
+	virtual int getNextState() { return m_nextState; }
 	virtual bool behavior(hlt::Ship* s) = 0;
 };
 

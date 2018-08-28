@@ -32,13 +32,16 @@ int main()
 		UpdateShipList();
 		//UpdateNearbyShip();
 
+		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
         for (hlt::Ship ship : player_ships)
 		{
+			hlt::Log::log("start");
             if (ship.docking_status != hlt::ShipDockingStatus::Undocked) 
 			{
                 continue;
             }
 
+			hlt::Log::log("not docking");
 			if (!ship.current_state)
 			{
 				hlt::Log::log("current state = Idle");
@@ -47,86 +50,7 @@ int main()
 
 			hlt::Log::log("start action");
 			ship.action();
-
-			//const hlt::Planet nearestPlanet = GetNearestPlanet(ship);
-
-			//if (nearestPlanet.entity_id != -1)
-			//{
-			//	if (GetNumberOfEnemyShips(map, nearestPlanet, player_id) <= GetNumberOfSurroundShips(map.ships.at(player_id), ship))
-			//	{
-			//		if (ship.can_dock(nearestPlanet))
-			//		{
-			//			if (!nearestPlanet.is_full())
-			//			{
-			//				moves.push_back(hlt::Move::dock(ship.entity_id, nearestPlanet.entity_id));
-			//				continue;
-			//			}
-			//			else
-			//			{
-			//				hlt::Ship nearestEnemyShip = GetNearestEnemyShip(map, ship);
-			//				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_towards_target(map, ship, nearestEnemyShip.location, hlt::constants::MAX_SPEED, true, 25, 5);
-			//				if (move.second)
-			//				{
-			//					moves.push_back(move.first);
-			//					continue;
-			//				}
-			//			}
-			//		}
-			//	}
-			//}
-
-			//if (nearestPlanet.entity_id != -1)
-			//{
-			//	if (ship.can_dock(nearestPlanet))
-			//	{
-			//		hlt::Log::log("can dock");
-			//		if (!nearestPlanet.is_full() && (nearestPlanet.owner_id == player_id || !nearestPlanet.owned))
-			//		{
-			//			hlt::Log::log("1");
-			//			moves.push_back(hlt::Move::dock(ship.entity_id, nearestPlanet.entity_id));
-			//			continue;
-			//		}
-			//		else
-			//		{
-			//			hlt::Log::log("2");
-			//			hlt::Ship nearestEnemyShip = GetNearestEnemyShip(ship);
-			//			if ((nearestEnemyShip.health > ship.health) && nearestEnemyShip.docking_status == hlt::ShipDockingStatus::Undocked)
-			//			{
-			//				const hlt::possibly<hlt::Move> suicideAttack = hlt::navigation::navigate_ship_towards_target(*game_map, ship, nearestEnemyShip.location, hlt::constants::MAX_SPEED, true, 90, 1);
-			//				if (suicideAttack.second)
-			//				{
-			//					moves.push_back(suicideAttack.first);
-			//					continue;
-			//				}
-			//			}
-			//			else
-			//			{
-			//				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestEnemyShip, hlt::constants::MAX_SPEED);
-			//				if (move.second)
-			//				{
-			//					moves.push_back(move.first);
-			//					continue;
-			//				}
-			//			}
-
-			//		}
-			//	}
-
-			//	hlt::Log::log("can not dock");
-			//	const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, ship, nearestPlanet, hlt::constants::MAX_SPEED);
-			//	if (move.second)
-			//	{
-			//		moves.push_back(move.first);
-			//	}
-			//	else
-			//	{
-			//		hlt::Log::log("can't move to dock");
-			//	}
-			//}
-			//else
-			//{
-			//	hlt::Log::log("-1");
-			//}
+			hlt::Log::log("end action");
         }
 
         if (!hlt::out::send_moves(moves)) 
@@ -134,6 +58,7 @@ int main()
             hlt::Log::log("send_moves failed; exiting");
             break;
         }
+		hlt::Log::log("send move success");
     }
 }
 

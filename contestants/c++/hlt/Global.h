@@ -15,8 +15,8 @@ extern std::vector<hlt::Move> moves;
 extern void UpdatePlanetList();
 extern void UpdateShipList();
 extern void UpdateNearbyShip();
-extern hlt::Planet GetNearestPlanet(const hlt::Ship ship);
-extern hlt::Ship GetNearestEnemyShip(const hlt::Ship myShip);
+extern hlt::Planet GetNearestPlanet(hlt::Ship* ship);
+extern hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip);
 
 #endif // !GLOBAL_H
 

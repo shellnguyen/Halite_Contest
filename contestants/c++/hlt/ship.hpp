@@ -42,6 +42,7 @@ namespace hlt {
 
 		Ship();
 		Ship(const Ship& other);
+		~Ship();
 
 		void action();
 		int getType() override 
