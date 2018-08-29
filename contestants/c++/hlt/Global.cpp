@@ -39,22 +39,29 @@ void UpdatePlanetList()
 
 void UpdateShipList()
 {
+	hlt::Log::log("UpdateShipList");
 	enemy_ships.clear();
+	hlt::Log::log("clear enemy_ships");
 	player_ships.clear();
+	hlt::Log::log("clear player_ships");
 
 	for (int i = 0; i < game_map->ships.size(); ++i)
 	{
 		int nShip = game_map->ships.at(i).size();
 		if (i == player_id)
 		{
+			hlt::Log::log("add ship to player_ships");
 			player_ships.reserve(nShip);
 			player_ships.assign(game_map->ships.at(i).begin(), game_map->ships.at(i).end());
+			hlt::Log::log("after add ship to player_ships");
 		}
 		else
 		{
+			hlt::Log::log("add ship to enemy_ships");
 			nShip += enemy_planets.size();
 			enemy_planets.reserve(nShip);
 			enemy_ships.insert(enemy_ships.end(), game_map->ships.at(i).begin(), game_map->ships.at(i).end());
+			hlt::Log::log("after add ship to enemy_ships");
 		}
 	}
 }

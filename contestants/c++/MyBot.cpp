@@ -25,15 +25,21 @@ int main()
 
 
     for (;;) {
+		hlt::Log::log("begin");
         moves.clear();
+		hlt::Log::log("clear map");
         hlt::Map map = hlt::in::get_map();
+		hlt::Log::log("get new map");
 		game_map = &map;
+		hlt::Log::log("after merger map");
 		UpdatePlanetList();
+		hlt::Log::log("after UpdatePlanetList");
 		UpdateShipList();
+		hlt::Log::log("after UpdateShipList");
 		//UpdateNearbyShip();
 
 		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
-        for (hlt::Ship ship : player_ships)
+        for (hlt::Ship& ship : player_ships)
 		{
 			hlt::Log::log("start");
             if (ship.docking_status != hlt::ShipDockingStatus::Undocked) 

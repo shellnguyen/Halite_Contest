@@ -7,6 +7,7 @@
 #include "Avoiding.h"
 #include "Moving.h"
 #include "hlt.hpp"
+#include "Global.h"
 
 hlt::Ship::Ship() : Entity()
 {
@@ -54,8 +55,9 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 
 hlt::Ship::~Ship()
 {
-	delete current_target;
-	delete current_state;
+	SAFE_DELETE(current_state);
+	//SAFE_DELETE(current_target);
+	//hlt::Log::log("after delete current_target");
 }
 
 void hlt::Ship::action()

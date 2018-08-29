@@ -6,6 +6,8 @@
 #include "navigation.hpp"
 #include <vector>
 
+#define SAFE_DELETE(p) if ((p) != NULL) { delete (p); (p) = NULL; }
+
 extern hlt::PlayerId player_id;
 extern hlt::Map* game_map;
 extern std::vector<hlt::Ship> enemy_ships, player_ships;
