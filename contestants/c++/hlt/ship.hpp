@@ -4,7 +4,7 @@
 #include "types.hpp"
 #include "planet.hpp"
 
-class State;
+class Behavior;
 
 namespace hlt {
     /// The states a ship can be in regarding docking.
@@ -35,7 +35,7 @@ namespace hlt {
 
 		//Entity* last_target;
 		Entity* current_target;
-		State* current_state;
+		Behavior* current_behavior;
 
 		std::vector<hlt::Ship> in_range_enemies;
 		std::vector<hlt::Ship> in_range_allies;

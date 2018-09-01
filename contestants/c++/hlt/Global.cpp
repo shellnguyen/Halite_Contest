@@ -135,7 +135,6 @@ hlt::Planet GetNearestPlanet(hlt::Ship* ship)
 	//std::sort(non_player_planets.begin(), non_player_planets.end(), [ship](hlt::Planet* a, hlt::Planet* b) { return a->location.get_distance_to(ship.location) < b->location.get_distance_to(ship.location); });
 
 	std::sort(game_map->planets.begin(), game_map->planets.end(), comp);
-	hlt::Log::log("huhuhuh");
 
 	for (const hlt::Planet& planet : game_map->planets)
 	{
@@ -172,4 +171,54 @@ hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 
 		return enemyShip;
 	}
+}
+
+int CountShipInRadius(double radius, hlt::Ship* s, bool friendlyOnly)
+{
+	int nShip = 0;
+
+	if (friendlyOnly)
+	{	
+		for (auto& frienly : player_ships)
+		{
+			if (frienly.docking_status != hlt::ShipDockingStatus::Undocked)
+			{
+				continue;
+			}
+
+			if (s->location.get_distance_to(frienly.location) <= radius)
+			{
+				nShip++;
+			}
+		}
+	}
+	else
+	{
+		for (auto& enemy : enemy_ships)
+		{
+			if (enemy.docking_status != hlt::ShipDockingStatus::Undocked)
+			{
+				continue;
+			}
+
+			if (s->location.get_distance_to(enemy.location) <= radius)
+			{
+				nShip++;
+			}
+		}
+	}
+
+	return nShip;
+}
+
+bool ShouldDockToPlanet(hlt::Planet* planet)
+{
+	if (planet)
+	{
+		if (planet->docked_ships.size() < planet->docking_spots)
+		{
+			return true;
+		}
+	}
+	return false;
 }

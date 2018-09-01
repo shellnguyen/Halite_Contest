@@ -1,10 +1,9 @@
 #include "hlt/navigation.hpp"
 #include "hlt/Global.h"
+#include "hlt/Colonize.h"
+#include "hlt/Attack.h"
+#include "hlt/March.h"
 #include <algorithm>
-
-bool IsPlayerShip(const hlt::Map map, const hlt::EntityId entityId, const hlt::PlayerId playerId);
-int GetNumberOfSurroundShips(const std::vector<hlt::Ship> ships, const hlt::Entity entity);
-int GetNumberOfEnemyShips(const hlt::Map map, const hlt::Planet planet, hlt::PlayerId player_id);
 
 int main()
 {
@@ -25,18 +24,11 @@ int main()
 
 
     for (;;) {
-		hlt::Log::log("begin");
         moves.clear();
-		hlt::Log::log("clear map");
         hlt::Map map = hlt::in::get_map();
-		hlt::Log::log("get new map");
 		game_map = &map;
-		hlt::Log::log("after merger map");
 		UpdatePlanetList();
-		hlt::Log::log("after UpdatePlanetList");
 		UpdateShipList();
-		hlt::Log::log("after UpdateShipList");
-		//UpdateNearbyShip();
 
 		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
         for (hlt::Ship& ship : player_ships)
@@ -47,11 +39,87 @@ int main()
                 continue;
             }
 
-			hlt::Log::log("not docking");
-			if (!ship.current_state)
+			int nFriendly = 0;
+			int nEnemy = 0;
+
+			hlt::Planet nearestPlanet = GetNearestPlanet(&ship);
+			hlt::Ship nearestEnemy = GetNearestEnemyShip(&ship);
+
+			if (nearestPlanet.entity_id != -1)
 			{
-				hlt::Log::log("current state = Idle");
-				ship.current_state = new Idle();
+				hlt::Log::log("found planet");
+				if (ship.can_dock(nearestPlanet))
+				{
+					hlt::Log::log("can dock planet");
+					if (!nearestPlanet.owned)
+					{
+						hlt::Log::log("planet not owned");
+						nFriendly = CountShipInRadius(25.0, &ship, true);
+						nEnemy = CountShipInRadius(35.0, &ship);
+
+						if (nFriendly > nEnemy)
+						{
+							if (ShouldDockToPlanet(&nearestPlanet))
+							{
+								ship.current_behavior = new Colonize();
+								ship.current_target = &nearestPlanet;
+							}
+						}
+					}
+					else
+					{
+						if (nearestPlanet.owner_id != player_id)
+						{
+							hlt::Log::log("planet belong to enemy");
+							//nFriendly = CountShipInRadius(25.0, &ship, true);
+							hlt::Log::log("friendly = " + to_string(nFriendly));
+							//nEnemy = CountShipInRadius(35.0, &ship);
+							hlt::Log::log("enemy = " + to_string(nFriendly));
+
+							//if (nFriendly > nEnemy)
+							//{
+								hlt::Log::log("friendly > enemy");
+								ship.current_behavior = new Attack();
+								if (ship.in_range_enemies.size() > 0)
+								{
+									ship.current_target = &ship.in_range_enemies[0];
+								}
+								else
+								{
+									ship.current_target = &nearestEnemy;
+								}
+							//}
+						}
+						else
+						{
+							if (!nearestPlanet.is_full())
+							{
+								hlt::Log::log("planet belong to us and not full");
+								ship.current_behavior = new Colonize();
+								ship.current_target = &nearestPlanet;
+							}
+						}
+					}
+				}
+
+				if (!ship.current_behavior)
+				{
+					hlt::Log::log("move to planet");
+					ship.current_behavior = new March();
+					ship.current_target = &nearestPlanet;
+				}
+				else
+				{
+					hlt::Log::log("wtf");
+				}
+			}
+			else
+			{
+				if (nearestEnemy.entity_id != -1)
+				{
+					ship.current_behavior = new Attack();
+					ship.current_target = &nearestEnemy;
+				}
 			}
 
 			hlt::Log::log("start action");
@@ -66,59 +134,4 @@ int main()
         }
 		hlt::Log::log("send move success");
     }
-}
-
-int GetNumberOfEnemyShips(const hlt::Map map, const hlt::Planet planet, hlt::PlayerId player_id)
-{
-	int numOfEnemyShips = 0;
-	std::vector<hlt::Ship> enemyShips;
-
-	//Get list of enemy ship
-	for (auto const& shipPair : map.ships)
-	{
-		if (shipPair.first != player_id)
-		{
-			enemyShips = shipPair.second;
-		}
-	}
-
-	std::vector<hlt::Ship> filterEnemyShip;
-	//std::copy_if(enemyShips.begin(), enemyShips.end(), filterEnemyShip, [](hlt::Ship s) {return s.docking_status != hlt::ShipDockingStatus::Undocked; });
-
-	numOfEnemyShips = GetNumberOfSurroundShips(filterEnemyShip, planet);
-
-	return numOfEnemyShips;
-}
-
-int GetNumberOfSurroundShips(const std::vector<hlt::Ship> ships, const hlt::Entity entity)
-{
-	int numOfShips = 0;
-
-	for (hlt::Ship ship : ships)
-	{
-		if (entity.location.get_distance_to(ship.location) <= 6.0)
-		{
-			numOfShips++;
-		}
-	}
-
-	return numOfShips;
-}
-
-bool IsPlayerShip(const hlt::Map map, const hlt::EntityId entityId, const hlt::PlayerId playerId)
-{
-	if (entityId == -1)
-	{
-		return false;
-	}
-
-	for (const hlt::Ship& ship : map.ships.at(playerId))
-	{
-		if (ship.entity_id == entityId)
-		{
-			return true;
-		}
-	}
-
-	return false;
 }

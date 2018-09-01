@@ -1,13 +1,8 @@
 #include "ship.hpp"
-#include "State.h"
-#include "Docking.h"
 #include "log.hpp"
-#include "Idle.h"
-#include "Engaging.h"
-#include "Avoiding.h"
-#include "Moving.h"
 #include "hlt.hpp"
 #include "Global.h"
+#include "Behavior.h"
 
 hlt::Ship::Ship() : Entity()
 {
@@ -17,7 +12,7 @@ hlt::Ship::Ship() : Entity()
 	this->weapon_cooldown = 0;
 	//this->last_target = NULL;
 	this->current_target = NULL;
-	this->current_state = NULL;
+	this->current_behavior = NULL;
 }
 
 hlt::Ship::Ship(const Ship& other) : Entity(other)
@@ -35,7 +30,7 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 	//{
 	//	this->last_target = other.current_target;
 	//}
-	this->current_state = other.current_state;
+	this->current_behavior = other.current_behavior;
 
 	//if (other.current_state)
 	//{
@@ -55,41 +50,22 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 
 hlt::Ship::~Ship()
 {
-	SAFE_DELETE(current_state);
+	SAFE_DELETE(current_behavior);
 	//SAFE_DELETE(current_target);
 	//hlt::Log::log("after delete current_target");
 }
 
 void hlt::Ship::action()
 {
-	if (this->current_state->behavior(this))
+	if (this->current_behavior)
 	{
-		hlt::Log::log("Time to move to next state");
-		int nextState = this->current_state->getNextState();
-		hlt::Log::log("nextState = " + to_string(nextState));
-		switch (nextState)
+		if (!this->current_behavior->action(this))
 		{
-			case STATE::IDLE:
-				this->current_state = new Idle();
-				hlt::Log::log("next state = idle");
-				break;
-			case STATE::DOCKING:
-				this->current_state = new Docking();
-				hlt::Log::log("next state = docking");
-				break;
-			case STATE::MOVING:
-				this->current_state = new Moving();
-				hlt::Log::log("next state = moving");
-				break;
-			case STATE::ENGAGING:
-				this->current_state = new Engaging();
-				hlt::Log::log("next state = engaging");
-				break;
-			case STATE::AVOIDING:
-				this->current_state = new Avoiding();
-				hlt::Log::log("next state = avoiding");
-				break;
+			hlt::Log::log("ship[" + to_string(this->entity_id) + "] do action failed !!!");
 		}
-		hlt::Log::log("next state success");
+	}
+	else
+	{
+		hlt::Log::log("assign task went wrong !!!");
 	}
 }
