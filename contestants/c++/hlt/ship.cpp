@@ -13,6 +13,7 @@ hlt::Ship::Ship() : Entity()
 	//this->last_target = NULL;
 	this->current_target = NULL;
 	this->current_behavior = NULL;
+	this->score = health;
 }
 
 hlt::Ship::Ship(const Ship& other) : Entity(other)
@@ -31,6 +32,7 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 	//	this->last_target = other.current_target;
 	//}
 	this->current_behavior = other.current_behavior;
+	this->score = other.score;
 
 	//if (other.current_state)
 	//{
@@ -68,4 +70,14 @@ void hlt::Ship::action()
 	{
 		hlt::Log::log("assign task went wrong !!!");
 	}
+}
+
+int hlt::Ship::getScore()
+{
+	this->score = SCORE_BASE_SHIP + this->health + this->in_range_allies.size();
+	if (this->docking_status != hlt::ShipDockingStatus::Docked)
+	{
+		this->score -= SCORE_DOCKED_SHIP;
+	}
+	return this->score;
 }

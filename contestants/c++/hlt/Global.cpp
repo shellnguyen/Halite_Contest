@@ -145,6 +145,11 @@ hlt::Planet GetNearestPlanet(hlt::Ship* ship)
 			continue;
 		}
 
+		if (planet.targeted >= MAX_TARGETED)
+		{
+			continue;
+		}
+
 		return planet;
 	}
 
@@ -165,6 +170,11 @@ hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 	for (hlt::Ship& enemyShip : enemy_ships)
 	{
 		if (!enemyShip.is_alive())
+		{
+			continue;
+		}
+
+		if (enemyShip.targeted > enemyShip.in_range_allies.size() + 5)
 		{
 			continue;
 		}

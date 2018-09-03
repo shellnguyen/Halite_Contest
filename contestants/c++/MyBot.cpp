@@ -64,6 +64,11 @@ int main()
 								ship.current_behavior = new Colonize();
 								ship.current_target = &nearestPlanet;
 							}
+							else
+							{
+								ship.current_behavior = new Attack();
+								ship.current_target = &nearestEnemy;
+							}
 						}
 					}
 					else

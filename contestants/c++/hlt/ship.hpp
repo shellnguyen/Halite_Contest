@@ -49,5 +49,7 @@ namespace hlt {
 		{
 			return 1;
 		}
+
+		int getScore() override;
     };
 }

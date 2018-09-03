@@ -7,6 +7,18 @@
 
 #define SAFE_DELETE(p) if ((p) != NULL) { delete (p); (p) = NULL; }
 
+//Score for ship
+#define SCORE_DOCKED_SHIP 50
+#define SCORE_BASE_SHIP 5
+
+//Score for planet
+#define SCORE_BASE_PLANET 100
+#define SCORE_ENEMY_PLANET 100
+
+//Other
+#define MAX_TARGETED 10
+#define MAX_SHIP_DEFEND 3
+
 extern hlt::PlayerId player_id;
 extern hlt::Map* game_map;
 extern std::vector<hlt::Ship> enemy_ships, player_ships;

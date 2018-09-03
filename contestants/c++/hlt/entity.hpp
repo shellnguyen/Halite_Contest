@@ -10,6 +10,8 @@ namespace hlt {
         Location location;
         int health;
         double radius;
+		int score;
+		int targeted;
 
         bool is_alive() const {
             return health > 0;
@@ -23,5 +25,7 @@ namespace hlt {
 		Entity();
 
 		Entity(const Entity& other);
+
+		virtual int getScore() = 0;
     };
 }
