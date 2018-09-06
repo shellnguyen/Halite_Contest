@@ -22,7 +22,6 @@ int main()
             << "; planets: " << initial_map.planets.size();
     hlt::Log::log(initial_map_intelligence.str());
 
-
     for (;;) {
         moves.clear();
         hlt::Map map = hlt::in::get_map();
@@ -63,11 +62,13 @@ int main()
 							{
 								ship.current_behavior = new Colonize();
 								ship.current_target = &nearestPlanet;
+								ship.current_target->targeted++;
 							}
 							else
 							{
 								ship.current_behavior = new Attack();
 								ship.current_target = &nearestEnemy;
+								ship.current_target->targeted++;
 							}
 						}
 					}
@@ -76,24 +77,26 @@ int main()
 						if (nearestPlanet.owner_id != player_id)
 						{
 							hlt::Log::log("planet belong to enemy");
-							//nFriendly = CountShipInRadius(25.0, &ship, true);
-							hlt::Log::log("friendly = " + to_string(nFriendly));
-							//nEnemy = CountShipInRadius(35.0, &ship);
-							hlt::Log::log("enemy = " + to_string(nFriendly));
 
 							//if (nFriendly > nEnemy)
 							//{
-								hlt::Log::log("friendly > enemy");
-								ship.current_behavior = new Attack();
-								if (ship.in_range_enemies.size() > 0)
-								{
-									ship.current_target = &ship.in_range_enemies[0];
-								}
-								else
-								{
-									ship.current_target = &nearestEnemy;
-								}
-							//}
+								//hlt::Log::log("friendly > enemy");
+							ship.current_behavior = new Attack();
+							if (ship.in_range_enemies.size() > 0)
+							{
+								ship.current_target = &ship.in_range_enemies[0];
+								ship.current_target->targeted++;
+							}
+							else
+							{
+								ship.current_target = &nearestEnemy;
+								ship.current_target->targeted++;
+							}
+							/*}
+							else
+							{
+
+							}*/
 						}
 						else
 						{
@@ -102,6 +105,7 @@ int main()
 								hlt::Log::log("planet belong to us and not full");
 								ship.current_behavior = new Colonize();
 								ship.current_target = &nearestPlanet;
+								ship.current_target->targeted++;
 							}
 						}
 					}
@@ -112,6 +116,7 @@ int main()
 					hlt::Log::log("move to planet");
 					ship.current_behavior = new March();
 					ship.current_target = &nearestPlanet;
+					ship.current_target->targeted++;
 				}
 				else
 				{
@@ -124,6 +129,7 @@ int main()
 				{
 					ship.current_behavior = new Attack();
 					ship.current_target = &nearestEnemy;
+					ship.current_target->targeted++;
 				}
 			}
 

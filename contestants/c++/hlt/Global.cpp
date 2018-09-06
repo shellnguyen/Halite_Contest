@@ -174,7 +174,7 @@ hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 			continue;
 		}
 
-		if (enemyShip.targeted > enemyShip.in_range_allies.size() + 5)
+		if (enemyShip.targeted > enemyShip.in_range_allies.size() + MAX_TARGETED)
 		{
 			continue;
 		}
