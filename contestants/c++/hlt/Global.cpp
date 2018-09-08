@@ -128,7 +128,7 @@ struct CompareShipDistance
 	}
 };
 
-hlt::Planet GetNearestPlanet(hlt::Ship* ship)
+hlt::Planet GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
 {
 	hlt::Log::log("GetNearestPlanet");
 	ComparePlanetDistance comp(ship);
@@ -138,7 +138,6 @@ hlt::Planet GetNearestPlanet(hlt::Ship* ship)
 
 	for (const hlt::Planet& planet : game_map->planets)
 	{
-		hlt::Log::log("check planet");
 		if ((planet.owner_id == ship->owner_id) && planet.is_full())
 		{
 			hlt::Log::log("continue");
@@ -151,6 +150,33 @@ hlt::Planet GetNearestPlanet(hlt::Ship* ship)
 		}
 
 		return planet;
+	}
+
+	hlt::Log::log("no planet");
+	hlt::Planet noPlanet;
+	noPlanet.entity_id = -1;
+	return noPlanet;
+}
+
+hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet that could be target by Enemy
+{
+	hlt::Log::log("GetNearestPlanet");
+	ComparePlanetDistance comp(ship);
+	//std::sort(non_player_planets.begin(), non_player_planets.end(), [ship](hlt::Planet* a, hlt::Planet* b) { return a->location.get_distance_to(ship.location) < b->location.get_distance_to(ship.location); });
+
+	std::sort(player_planets.begin(), player_planets.end(), comp);
+
+	for (auto& planet : player_planets)
+	{
+		int nEnemy = CountShipInRadius(10, &planet);
+		int nFriendly = CountShipInRadius(15.0, &planet, true);
+
+		hlt::Log::log("enemy = " + to_string(nEnemy) + ", friendly = " + to_string(nFriendly));
+
+		if ((nEnemy > nFriendly) && ((planet.targeted + nFriendly - nEnemy) < 2) && (planet.targeted < MAX_TARGETED))
+		{
+			return planet;
+		}
 	}
 
 	hlt::Log::log("no planet");
@@ -183,7 +209,7 @@ hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 	}
 }
 
-int CountShipInRadius(double radius, hlt::Ship* s, bool friendlyOnly)
+int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly)
 {
 	int nShip = 0;
 
@@ -196,7 +222,7 @@ int CountShipInRadius(double radius, hlt::Ship* s, bool friendlyOnly)
 				continue;
 			}
 
-			if (s->location.get_distance_to(frienly.location) <= radius)
+			if (s->location.get_distance_to(frienly.location) <= radius + s->radius)
 			{
 				nShip++;
 			}
@@ -211,7 +237,7 @@ int CountShipInRadius(double radius, hlt::Ship* s, bool friendlyOnly)
 				continue;
 			}
 
-			if (s->location.get_distance_to(enemy.location) <= radius)
+			if (s->location.get_distance_to(enemy.location) <= radius + s->radius)
 			{
 				nShip++;
 			}
