@@ -23,6 +23,8 @@ int main()
             << "; planets: " << initial_map.planets.size();
     hlt::Log::log(initial_map_intelligence.str());
 
+	nShipHarass = 0;
+
     for (;;) {
         moves.clear();
         hlt::Map map = hlt::in::get_map();
@@ -34,11 +36,12 @@ int main()
         for (hlt::Ship& ship : player_ships)
 		{
 			hlt::Log::log("ship[" + to_string(ship.entity_id) + "]");
-            if (ship.docking_status != hlt::ShipDockingStatus::Undocked) 
+
+			if (ship.docking_status != hlt::ShipDockingStatus::Undocked)
 			{
-				hlt::Log::log("end\n");
-                continue;
-            }
+				//hlt::Ship nearestEnemy = GetNearestEnemyShip(&ship);
+				continue;
+			}
 
 			int nFriendly = 0;
 			int nEnemy = 0;
@@ -46,6 +49,20 @@ int main()
 			hlt::Planet nearestPlanet = GetNearestPlanet(&ship);
 			hlt::Ship nearestEnemy = GetNearestEnemyShip(&ship);
 			hlt::Planet nearestFriendlyPlanet = GetNearestPlayerPlanet(&ship); //Get friendly planet that could be a target of enemy
+
+			if (ship.location.get_distance_to(nearestEnemy.location) <= 70.0)
+			{
+				hlt::Log::log("number of undocked_ship : " + to_string(player_undocked_ships.size()));
+				hlt::Log::log("max number of harass ship : " + to_string(player_undocked_ships.size() / 5));
+				if (nShipHarass <= (player_undocked_ships.size() / 5))
+				{
+					ship.current_behavior = new Attack();
+					ship.current_target = &nearestEnemy;
+					nShipHarass++;
+					ship.action();
+					continue;
+				}
+			}
 
 			if (nearestFriendlyPlanet.entity_id != -1)
 			{
@@ -158,6 +175,7 @@ int main()
             hlt::Log::log("send_moves failed; exiting");
             break;
         }
+		nShipHarass = 0;
 		hlt::Log::log("send move success");
     }
 }

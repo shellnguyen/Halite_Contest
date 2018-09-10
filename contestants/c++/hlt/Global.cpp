@@ -3,9 +3,11 @@
 
 hlt::PlayerId player_id;
 hlt::Map* game_map;
-std::vector<hlt::Ship> enemy_ships, player_ships;
+std::vector<hlt::Ship> enemy_ships, enemy_docked_ship;
+std::vector<hlt::Ship> player_ships, player_undocked_ships;
 std::vector<hlt::Planet> neutral_planets, enemy_planets, player_planets, non_player_planets;
 std::vector<hlt::Move> moves;
+int nShipHarass;
 
 //Update all list in begining of turn
 void UpdatePlanetList()
@@ -41,9 +43,11 @@ void UpdateShipList()
 {
 	hlt::Log::log("UpdateShipList");
 	enemy_ships.clear();
+	enemy_docked_ship.clear();
 	hlt::Log::log("clear enemy_ships");
 	player_ships.clear();
 	hlt::Log::log("clear player_ships");
+	player_undocked_ships.clear();
 
 	for (int i = 0; i < game_map->ships.size(); ++i)
 	{
@@ -64,6 +68,24 @@ void UpdateShipList()
 			hlt::Log::log("after add ship to enemy_ships");
 		}
 	}
+
+	for (auto& ship : player_ships)
+	{
+		if (ship.docking_status != hlt::ShipDockingStatus::Undocked)
+		{
+			continue;
+		}
+
+		player_undocked_ships.push_back(ship);
+	}
+
+	for (auto& enemy : enemy_ships)
+	{
+		if (enemy.docking_status != hlt::ShipDockingStatus::Undocked)
+		{
+			enemy_docked_ship.push_back(enemy);
+		}
+	}
 }
 
 void UpdateNearbyShip()
@@ -76,11 +98,16 @@ void UpdateNearbyShip()
 		{
 			s.in_range_allies.clear();
 			s.in_range_enemies.clear();
-			for (auto& player_v_pair_2 : game_map->ships) {
+			for (auto& player_v_pair_2 : game_map->ships) 
+			{
 				if (player_v_pair_2.first == player_v_pair.first) 
 				{
 					for (hlt::Ship& s2 : player_v_pair_2.second) 
 					{
+						if (s2.docking_status != hlt::ShipDockingStatus::Docked)
+						{
+							continue;
+						}
 						double d = s.location.get_distance_to(s2.location);
 						if (d <= range && d != 0) {
 							s.in_range_allies.push_back(s2);
@@ -91,6 +118,10 @@ void UpdateNearbyShip()
 				{
 					for (hlt::Ship& s2 : player_v_pair_2.second) 
 					{
+						if (s2.docking_status != hlt::ShipDockingStatus::Docked)
+						{
+							continue;
+						}
 						if (s.location.get_distance_to(s2.location) <= range)
 						{
 							s.in_range_enemies.push_back(s2);
@@ -201,6 +232,25 @@ hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 		}
 
 		if (enemyShip.targeted > enemyShip.in_range_allies.size() + MAX_TARGETED)
+		{
+			continue;
+		}
+
+		return enemyShip;
+	}
+}
+
+hlt::Ship GetNearestDockedEnemyShip(hlt::Ship* myShip)
+{
+	CompareShipDistance comp(myShip);
+	//std::sort(enemy_ships.begin(), enemy_ships.end(), [myShip](hlt::Ship* a, hlt::Ship* b) { return a->location.get_distance_to(myShip->location) < b->location.get_distance_to(myShip->location); });
+
+	//Sort enemyShip's list
+	std::sort(enemy_ships.begin(), enemy_ships.end(), comp);
+
+	for (hlt::Ship& enemyShip : enemy_ships)
+	{
+		if (!enemyShip.is_alive() || (enemyShip.docking_status == hlt::ShipDockingStatus::Undocked))
 		{
 			continue;
 		}
