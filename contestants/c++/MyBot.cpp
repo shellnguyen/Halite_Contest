@@ -3,6 +3,7 @@
 #include "hlt/Colonize.h"
 #include "hlt/Attack.h"
 #include "hlt/March.h"
+#include "hlt/Defend.h"
 #include <algorithm>
 
 int main()
@@ -22,7 +23,6 @@ int main()
             << "; planets: " << initial_map.planets.size();
     hlt::Log::log(initial_map_intelligence.str());
 
-
     for (;;) {
         moves.clear();
         hlt::Map map = hlt::in::get_map();
@@ -33,9 +33,10 @@ int main()
 		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
         for (hlt::Ship& ship : player_ships)
 		{
-			hlt::Log::log("start");
+			hlt::Log::log("ship[" + to_string(ship.entity_id) + "]");
             if (ship.docking_status != hlt::ShipDockingStatus::Undocked) 
 			{
+				hlt::Log::log("end\n");
                 continue;
             }
 
@@ -44,92 +45,112 @@ int main()
 
 			hlt::Planet nearestPlanet = GetNearestPlanet(&ship);
 			hlt::Ship nearestEnemy = GetNearestEnemyShip(&ship);
+			hlt::Planet nearestFriendlyPlanet = GetNearestPlayerPlanet(&ship); //Get friendly planet that could be a target of enemy
 
-			if (nearestPlanet.entity_id != -1)
+			if (nearestFriendlyPlanet.entity_id != -1)
 			{
-				hlt::Log::log("found planet");
-				if (ship.can_dock(nearestPlanet))
+				hlt::Log::log("planet need protect");
+				ship.current_target = &nearestFriendlyPlanet;
+				ship.current_target->targeted++;
+				ship.current_behavior = new Defend();
+			}
+			else
+			{
+				if (nearestPlanet.entity_id != -1)
 				{
-					hlt::Log::log("can dock planet");
-					if (!nearestPlanet.owned)
+					hlt::Log::log("found planet");
+					if (ship.can_dock(nearestPlanet))
 					{
-						hlt::Log::log("planet not owned");
-						nFriendly = CountShipInRadius(25.0, &ship, true);
-						nEnemy = CountShipInRadius(35.0, &ship);
-
-						if (nFriendly > nEnemy)
+						hlt::Log::log("can dock planet");
+						if (!nearestPlanet.owned)
 						{
-							if (ShouldDockToPlanet(&nearestPlanet))
+							hlt::Log::log("planet not owned");
+							nFriendly = CountShipInRadius(25.0, &ship, true);
+							nEnemy = CountShipInRadius(35.0, &ship);
+
+							if (nFriendly > nEnemy)
 							{
-								ship.current_behavior = new Colonize();
-								ship.current_target = &nearestPlanet;
-							}
-							else
-							{
-								ship.current_behavior = new Attack();
-								ship.current_target = &nearestEnemy;
+								if (ShouldDockToPlanet(&nearestPlanet))
+								{
+									ship.current_behavior = new Colonize();
+									ship.current_target = &nearestPlanet;
+									ship.current_target->targeted++;
+								}
+								else
+								{
+									ship.current_behavior = new Attack();
+									ship.current_target = &nearestEnemy;
+									ship.current_target->targeted++;
+								}
 							}
 						}
-					}
-					else
-					{
-						if (nearestPlanet.owner_id != player_id)
+						else
 						{
-							hlt::Log::log("planet belong to enemy");
-							//nFriendly = CountShipInRadius(25.0, &ship, true);
-							hlt::Log::log("friendly = " + to_string(nFriendly));
-							//nEnemy = CountShipInRadius(35.0, &ship);
-							hlt::Log::log("enemy = " + to_string(nFriendly));
+							if (nearestPlanet.owner_id != player_id)
+							{
+								hlt::Log::log("planet belong to enemy");
 
-							//if (nFriendly > nEnemy)
-							//{
-								hlt::Log::log("friendly > enemy");
+								//if (nFriendly > nEnemy)
+								//{
+								//hlt::Log::log("friendly > enemy");
 								ship.current_behavior = new Attack();
 								if (ship.in_range_enemies.size() > 0)
 								{
 									ship.current_target = &ship.in_range_enemies[0];
+									ship.current_target->targeted++;
 								}
 								else
 								{
 									ship.current_target = &nearestEnemy;
+									ship.current_target->targeted++;
 								}
-							//}
-						}
-						else
-						{
-							if (!nearestPlanet.is_full())
+								/*}
+								else
+								{
+
+								}*/
+							}
+							else
 							{
-								hlt::Log::log("planet belong to us and not full");
-								ship.current_behavior = new Colonize();
-								ship.current_target = &nearestPlanet;
+								if (!nearestPlanet.is_full())
+								{
+									hlt::Log::log("planet belong to us and not full");
+									ship.current_behavior = new Colonize();
+									ship.current_target = &nearestPlanet;
+									ship.current_target->targeted++;
+								}
 							}
 						}
 					}
-				}
 
-				if (!ship.current_behavior)
-				{
-					hlt::Log::log("move to planet");
-					ship.current_behavior = new March();
-					ship.current_target = &nearestPlanet;
+					if (!ship.current_behavior)
+					{
+						hlt::Log::log("move to planet");
+						ship.current_behavior = new March();
+						ship.current_target = &nearestPlanet;
+						ship.current_target->targeted++;
+					}
+					else
+					{
+						hlt::Log::log("wtf");
+					}
 				}
 				else
 				{
-					hlt::Log::log("wtf");
-				}
-			}
-			else
-			{
-				if (nearestEnemy.entity_id != -1)
-				{
-					ship.current_behavior = new Attack();
-					ship.current_target = &nearestEnemy;
+					if (nearestEnemy.entity_id != -1)
+					{
+						ship.current_behavior = new Attack();
+						ship.current_target = &nearestEnemy;
+						ship.current_target->targeted++;
+					}
 				}
 			}
 
 			hlt::Log::log("start action");
 			ship.action();
 			hlt::Log::log("end action");
+
+			hlt::Log::log("end\n");
         }
 
         if (!hlt::out::send_moves(moves)) 

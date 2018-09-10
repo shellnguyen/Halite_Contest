@@ -29,8 +29,9 @@ extern void UpdatePlanetList();
 extern void UpdateShipList();
 extern void UpdateNearbyShip();
 extern hlt::Planet GetNearestPlanet(hlt::Ship* ship);
+extern hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship);
 extern hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip);
-extern int CountShipInRadius(double radius, hlt::Ship* s, bool friendlyOnly = false);
+extern int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly = false);
 extern bool ShouldDockToPlanet(hlt::Planet* planet);
 
 #endif // !GLOBAL_H
