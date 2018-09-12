@@ -16,7 +16,7 @@ bool Defend::action(hlt::Ship* s)
 
 		if (friendlyShip.in_range_enemies.size() > 0)
 		{
-			const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, friendlyShip.in_range_enemies[0], hlt::constants::MAX_SPEED);
+			const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, friendlyShip.in_range_enemies[0], hlt::constants::MAX_SPEED, moves);
 			if (move.second)
 			{
 				moves.push_back(move.first);
@@ -30,7 +30,7 @@ bool Defend::action(hlt::Ship* s)
 				hlt::Ship nearestEnemy = GetNearestEnemyShip(s);
 				if (nearestEnemy.entity_id != -1)
 				{
-					const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, nearestEnemy, hlt::constants::MAX_SPEED);
+					const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, nearestEnemy, hlt::constants::MAX_SPEED, moves);
 					if (move.second)
 					{
 						moves.push_back(move.first);
@@ -40,7 +40,7 @@ bool Defend::action(hlt::Ship* s)
 			}
 			else
 			{
-				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, *s->current_target, hlt::constants::MAX_SPEED);
+				const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, *s->current_target, hlt::constants::MAX_SPEED, moves);
 				if (move.second)
 				{
 					moves.push_back(move.first);

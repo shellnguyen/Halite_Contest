@@ -84,7 +84,8 @@ namespace hlt {
 			const int max_thrust,
 			const bool avoid_obstacles,
 			const int max_corrections,
-			const double angular_step_rad)
+                const double angular_step_rad,
+                const std::vector<Move>& moved)
 		{
 			if (max_corrections <= 0) {
 				return { Move::noop(), false };
@@ -99,7 +100,7 @@ namespace hlt {
 				const Location new_target = { ship.location.pos_x + new_target_dx, ship.location.pos_y + new_target_dy };
 
 				return navigate_ship_towards_target(
-					map, ship, new_target, max_thrust, true, (max_corrections - 1), angular_step_rad);
+                        map, ship, new_target, max_thrust, true, (max_corrections - 1), angular_step_rad, moved);
 			}
 
 			int thrust;
@@ -120,7 +121,8 @@ namespace hlt {
                 const Map& map,
                 const Ship& ship,
                 const Entity& dock_target,
-                const int max_thrust)
+                const int max_thrust,
+                const std::vector<Move>& moved)
         {
             const int max_corrections = constants::MAX_NAVIGATION_CORRECTIONS;
             const bool avoid_obstacles = true;
@@ -128,7 +130,7 @@ namespace hlt {
             const Location& target = ship.location.get_closest_point(dock_target.location, dock_target.radius);
 
             return navigate_ship_towards_target(
-                    map, ship, target, max_thrust, avoid_obstacles, max_corrections, angular_step_rad);
+                    map, ship, target, max_thrust, avoid_obstacles, max_corrections, angular_step_rad, moved);
         }
     }
 }

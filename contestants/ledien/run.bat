@@ -1,2 +1,2 @@
 @echo OFF
-call %~dp0\ledien.exe
+call %~dp0\MyBot.exe

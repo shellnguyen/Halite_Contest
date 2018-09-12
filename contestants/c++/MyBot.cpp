@@ -50,10 +50,10 @@ int main()
 			hlt::Ship nearestEnemy = GetNearestEnemyShip(&ship);
 			hlt::Planet nearestFriendlyPlanet = GetNearestPlayerPlanet(&ship); //Get friendly planet that could be a target of enemy
 
-			if (ship.location.get_distance_to(nearestEnemy.location) <= 70.0)
+			if (ship.location.get_distance_to(nearestEnemy.location) <= 80.0)
 			{
 				hlt::Log::log("number of undocked_ship : " + to_string(player_undocked_ships.size()));
-				hlt::Log::log("max number of harass ship : " + to_string(player_undocked_ships.size() / 5));
+				hlt::Log::log("max number of harass ship : " + to_string(player_undocked_ships.size() / 4));
 				if (nShipHarass <= (player_undocked_ships.size() / 5))
 				{
 					ship.current_behavior = new Attack();

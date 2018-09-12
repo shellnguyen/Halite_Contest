@@ -10,7 +10,7 @@ bool March::action(hlt::Ship* s)
 {
 	if (s->current_target)
 	{
-		const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, *s->current_target, hlt::constants::MAX_SPEED);
+		const hlt::possibly<hlt::Move> move = hlt::navigation::navigate_ship_to_dock(*game_map, *s, *s->current_target, hlt::constants::MAX_SPEED,moves);
 		if (move.second)
 		{
 			moves.push_back(move.first);
