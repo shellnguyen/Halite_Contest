@@ -8,12 +8,14 @@
 #define SAFE_DELETE(p) if ((p) != NULL) { delete (p); (p) = NULL; }
 
 //Score for ship
-#define SCORE_DOCKED_SHIP 50
+#define SCORE_FRIENDLY_DOCKED_SHIP 40
+#define SCORE_ENEMY_DOCKED_SHIP 50
 #define SCORE_BASE_SHIP 5
 
 //Score for planet
-#define SCORE_BASE_PLANET 100
-#define SCORE_ENEMY_PLANET 100
+#define SCORE_BASE_PLANET 50
+#define SCORE_ENEMY_PLANET 30
+#define SCORE_PER_DOCKING_SPOT 6
 
 //Other
 #define MAX_TARGETED 10
@@ -31,6 +33,8 @@ extern int nShipHarass;
 extern void UpdatePlanetList();
 extern void UpdateShipList();
 extern void UpdateNearbyShip();
+extern void UpdateShipScore();
+extern void UpdatePlanetScore();
 extern hlt::Planet GetNearestPlanet(hlt::Ship* ship);
 extern hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship);
 extern hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip);

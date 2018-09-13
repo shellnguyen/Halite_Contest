@@ -137,13 +137,50 @@ void UpdateNearbyShip()
 	}
 }
 
+void UpdateShipScore()
+{
+	for (auto& friendly : player_ships)
+	{
+		friendly.score = SCORE_BASE_SHIP;
+		if (friendly.docking_status != hlt::ShipDockingStatus::Undocked)
+		{
+			friendly.score += SCORE_FRIENDLY_DOCKED_SHIP;
+		}
+	}
+
+	for (auto& enemy : enemy_ships)
+	{
+		enemy.score = SCORE_BASE_SHIP;
+		if (enemy.docking_status != hlt::ShipDockingStatus::Undocked)
+		{
+			enemy.score += SCORE_ENEMY_DOCKED_SHIP;
+		}
+	}
+}
+
+void UpdatePlanetScore()
+{
+	for (hlt::Planet& planet : game_map->planets)
+	{
+		if (!planet.owned || planet.owner_id == player_id)
+		{
+			planet.score = SCORE_BASE_PLANET;
+		}
+		else
+		{
+			planet.score = SCORE_ENEMY_PLANET;
+		}
+		planet.score += SCORE_PER_DOCKING_SPOT * planet.docking_spots;
+	}
+}
+
 //Logic function
 struct ComparePlanetDistance
 {
 	hlt::Ship* ship;
 	bool operator()(hlt::Planet p1, hlt::Planet p2)
 	{
-		return (ship->location.get_distance_to(p1.location) < ship->location.get_distance_to(p2.location));
+		return (p1.score - ship->location.get_distance_to(p1.location)) > (p2.score - ship->location.get_distance_to(p2.location));
 	}
 	ComparePlanetDistance(hlt::Ship* ship) : ship(ship) {};
 };
@@ -155,7 +192,7 @@ struct CompareShipDistance
 
 	bool operator()(hlt::Ship s1, hlt::Ship s2)
 	{
-		return (playerShip->location.get_distance_to(s1.location) < playerShip->location.get_distance_to(s2.location));
+		return (s1.score - playerShip->location.get_distance_to(s1.location)) > (s2.score - playerShip->location.get_distance_to(s2.location));
 	}
 };
 
@@ -210,7 +247,7 @@ hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet
 		}
 	}
 
-	hlt::Log::log("no planet");
+	hlt::Log::log("no friendly planet");
 	hlt::Planet noPlanet;
 	noPlanet.entity_id = -1;
 	return noPlanet;

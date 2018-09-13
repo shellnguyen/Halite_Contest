@@ -50,6 +50,6 @@ namespace hlt {
 			return 1;
 		}
 
-		int getScore() override;
+		double getScore() const override;
     };
 }

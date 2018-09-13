@@ -34,6 +34,8 @@ hlt::Ship::Ship(const Ship& other) : Entity(other)
 	this->current_behavior = other.current_behavior;
 	this->score = other.score;
 
+	this->score = SCORE_BASE_SHIP;
+
 	//if (other.current_state)
 	//{
 	//	
@@ -72,12 +74,7 @@ void hlt::Ship::action()
 	}
 }
 
-int hlt::Ship::getScore()
+double hlt::Ship::getScore() const
 {
-	this->score = SCORE_BASE_SHIP + this->health + this->in_range_allies.size();
-	if (this->docking_status != hlt::ShipDockingStatus::Docked)
-	{
-		this->score -= SCORE_DOCKED_SHIP;
-	}
 	return this->score;
 }

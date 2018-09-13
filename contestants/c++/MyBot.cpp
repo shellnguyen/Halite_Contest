@@ -31,6 +31,9 @@ int main()
 		game_map = &map;
 		UpdatePlanetList();
 		UpdateShipList();
+		UpdateNearbyShip();
+		UpdateShipScore();
+		UpdatePlanetScore();
 
 		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
         for (hlt::Ship& ship : player_ships)
