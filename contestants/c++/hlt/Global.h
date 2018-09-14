@@ -18,7 +18,7 @@
 #define SCORE_PER_DOCKING_SPOT 6
 
 //Other
-#define MAX_TARGETED 10
+#define MAX_TARGETED 5
 #define MAX_SHIP_DEFEND 3
 #define MAX_SHIP_HARASS 5
 
@@ -35,10 +35,10 @@ extern void UpdateShipList();
 extern void UpdateNearbyShip();
 extern void UpdateShipScore();
 extern void UpdatePlanetScore();
-extern hlt::Planet GetNearestPlanet(hlt::Ship* ship);
-extern hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship);
-extern hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip);
-extern hlt::Ship GetNearestDockedEnemyShip(hlt::Ship* myShip);
+extern hlt::Planet& GetNearestPlanet(hlt::Ship* ship);
+extern hlt::Planet& GetNearestPlayerPlanet(hlt::Ship* ship);
+extern hlt::Ship& GetNearestEnemyShip(hlt::Ship* myShip);
+extern hlt::Ship& GetNearestDockedEnemyShip(hlt::Ship* myShip);
 extern int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly = false);
 extern bool ShouldDockToPlanet(hlt::Planet* planet);
 

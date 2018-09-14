@@ -29,11 +29,11 @@ int main()
         moves.clear();
         hlt::Map map = hlt::in::get_map();
 		game_map = &map;
-		UpdatePlanetList();
-		UpdateShipList();
 		UpdateNearbyShip();
 		UpdateShipScore();
 		UpdatePlanetScore();
+		UpdatePlanetList();
+		UpdateShipList();
 
 		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
         for (hlt::Ship& ship : player_ships)
@@ -49,9 +49,10 @@ int main()
 			int nFriendly = 0;
 			int nEnemy = 0;
 
-			hlt::Planet nearestPlanet = GetNearestPlanet(&ship);
-			hlt::Ship nearestEnemy = GetNearestEnemyShip(&ship);
-			hlt::Planet nearestFriendlyPlanet = GetNearestPlayerPlanet(&ship); //Get friendly planet that could be a target of enemy
+			hlt::Planet& nearestPlanet = GetNearestPlanet(&ship);
+			hlt::Ship& nearestEnemy = GetNearestEnemyShip(&ship);
+			hlt::Ship& nearestDockedEnemy = GetNearestDockedEnemyShip(&ship);
+			hlt::Planet& nearestFriendlyPlanet = GetNearestPlayerPlanet(&ship); //Get friendly planet that could be a target of enemy
 
 			if (ship.location.get_distance_to(nearestEnemy.location) <= 80.0)
 			{
@@ -59,15 +60,17 @@ int main()
 				hlt::Log::log("max number of harass ship : " + to_string(player_undocked_ships.size() / 4));
 				if (nShipHarass <= (player_undocked_ships.size() / 5))
 				{
-					ship.current_behavior = new Attack();
+					
 					ship.current_target = &nearestEnemy;
+					
+					ship.current_behavior = new Attack();
 					nShipHarass++;
 					ship.action();
 					continue;
 				}
 			}
-
-			if (nearestFriendlyPlanet.entity_id != -1)
+			hlt::Log::log("not harass");
+			if ((nearestFriendlyPlanet.entity_id != -1) && (ship.location.get_distance_to(nearestEnemy.location) > (ship.location.get_distance_to(nearestFriendlyPlanet.location))))
 			{
 				hlt::Log::log("planet need protect");
 				ship.current_target = &nearestFriendlyPlanet;
@@ -81,6 +84,14 @@ int main()
 					hlt::Log::log("found planet");
 					if (ship.can_dock(nearestPlanet))
 					{
+						if (enemy_docked_ship.size() <= 0)
+						{
+							if (nearestEnemy.location.get_distance_to(ship.location) <= 80.0)
+							{
+								moves.push_back(hlt::Move::noop());
+							}
+						}
+
 						hlt::Log::log("can dock planet");
 						if (!nearestPlanet.owned)
 						{
@@ -110,9 +121,6 @@ int main()
 							{
 								hlt::Log::log("planet belong to enemy");
 
-								//if (nFriendly > nEnemy)
-								//{
-								//hlt::Log::log("friendly > enemy");
 								ship.current_behavior = new Attack();
 								if (ship.in_range_enemies.size() > 0)
 								{
@@ -124,11 +132,6 @@ int main()
 									ship.current_target = &nearestEnemy;
 									ship.current_target->targeted++;
 								}
-								/*}
-								else
-								{
-
-								}*/
 							}
 							else
 							{

@@ -104,7 +104,7 @@ void UpdateNearbyShip()
 				{
 					for (hlt::Ship& s2 : player_v_pair_2.second) 
 					{
-						if (s2.docking_status != hlt::ShipDockingStatus::Docked)
+						if (s2.docking_status != hlt::ShipDockingStatus::Undocked)
 						{
 							continue;
 						}
@@ -118,7 +118,7 @@ void UpdateNearbyShip()
 				{
 					for (hlt::Ship& s2 : player_v_pair_2.second) 
 					{
-						if (s2.docking_status != hlt::ShipDockingStatus::Docked)
+						if (s2.docking_status != hlt::ShipDockingStatus::Undocked)
 						{
 							continue;
 						}
@@ -139,21 +139,22 @@ void UpdateNearbyShip()
 
 void UpdateShipScore()
 {
-	for (auto& friendly : player_ships)
+	for (auto& ship_pair : game_map->ships)
 	{
-		friendly.score = SCORE_BASE_SHIP;
-		if (friendly.docking_status != hlt::ShipDockingStatus::Undocked)
+		for (auto& ship : ship_pair.second)
 		{
-			friendly.score += SCORE_FRIENDLY_DOCKED_SHIP;
-		}
-	}
-
-	for (auto& enemy : enemy_ships)
-	{
-		enemy.score = SCORE_BASE_SHIP;
-		if (enemy.docking_status != hlt::ShipDockingStatus::Undocked)
-		{
-			enemy.score += SCORE_ENEMY_DOCKED_SHIP;
+			ship.score = SCORE_BASE_SHIP;
+			if (ship.docking_status != hlt::ShipDockingStatus::Undocked)
+			{
+				if (ship.owner_id == player_id)
+				{
+					ship.score += SCORE_FRIENDLY_DOCKED_SHIP;
+				}
+				else
+				{
+					ship.score += SCORE_ENEMY_DOCKED_SHIP;
+				}
+			}
 		}
 	}
 }
@@ -196,7 +197,7 @@ struct CompareShipDistance
 	}
 };
 
-hlt::Planet GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
+hlt::Planet& GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
 {
 	hlt::Log::log("GetNearestPlanet");
 	ComparePlanetDistance comp(ship);
@@ -204,11 +205,16 @@ hlt::Planet GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
 
 	std::sort(game_map->planets.begin(), game_map->planets.end(), comp);
 
-	for (const hlt::Planet& planet : game_map->planets)
+	for (hlt::Planet& planet : game_map->planets)
 	{
 		if ((planet.owner_id == ship->owner_id) && planet.is_full())
 		{
 			hlt::Log::log("continue");
+			continue;
+		}
+
+		if (!planet.owned && planet.targeted >= planet.docking_spots)
+		{
 			continue;
 		}
 
@@ -226,7 +232,7 @@ hlt::Planet GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
 	return noPlanet;
 }
 
-hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet that could be target by Enemy
+hlt::Planet& GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet that could be target by Enemy
 {
 	hlt::Log::log("GetNearestPlanet");
 	ComparePlanetDistance comp(ship);
@@ -234,10 +240,10 @@ hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet
 
 	std::sort(player_planets.begin(), player_planets.end(), comp);
 
-	for (auto& planet : player_planets)
+	for (hlt::Planet& planet : player_planets)
 	{
-		int nEnemy = CountShipInRadius(10, &planet);
-		int nFriendly = CountShipInRadius(15.0, &planet, true);
+		int nEnemy = CountShipInRadius(30.0, &planet);
+		int nFriendly = CountShipInRadius(20.0, &planet, true);
 
 		hlt::Log::log("enemy = " + to_string(nEnemy) + ", friendly = " + to_string(nFriendly));
 
@@ -253,7 +259,7 @@ hlt::Planet GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet
 	return noPlanet;
 }
 
-hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
+hlt::Ship& GetNearestEnemyShip(hlt::Ship* myShip)
 {
 	CompareShipDistance comp(myShip);
 	//std::sort(enemy_ships.begin(), enemy_ships.end(), [myShip](hlt::Ship* a, hlt::Ship* b) { return a->location.get_distance_to(myShip->location) < b->location.get_distance_to(myShip->location); });
@@ -277,7 +283,7 @@ hlt::Ship GetNearestEnemyShip(hlt::Ship* myShip)
 	}
 }
 
-hlt::Ship GetNearestDockedEnemyShip(hlt::Ship* myShip)
+hlt::Ship& GetNearestDockedEnemyShip(hlt::Ship* myShip)
 {
 	CompareShipDistance comp(myShip);
 	//std::sort(enemy_ships.begin(), enemy_ships.end(), [myShip](hlt::Ship* a, hlt::Ship* b) { return a->location.get_distance_to(myShip->location) < b->location.get_distance_to(myShip->location); });
@@ -294,6 +300,11 @@ hlt::Ship GetNearestDockedEnemyShip(hlt::Ship* myShip)
 
 		return enemyShip;
 	}
+
+	hlt::Log::log("no enemy docked ship");
+	hlt::Ship noShip;
+	noShip.entity_id = -1;
+	return noShip;
 }
 
 int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly)
