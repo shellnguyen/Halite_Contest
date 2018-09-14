@@ -7,6 +7,7 @@ std::vector<hlt::Ship> enemy_ships, enemy_docked_ship;
 std::vector<hlt::Ship> player_ships, player_undocked_ships;
 std::vector<hlt::Planet> neutral_planets, enemy_planets, player_planets, non_player_planets;
 std::vector<hlt::Move> moves;
+std::unordered_map<hlt::EntityId, hlt::EntityId> last_turn_targets; //store ship last turn target id
 int nShipHarass;
 
 //Update all list in begining of turn
@@ -172,6 +173,33 @@ void UpdatePlanetScore()
 			planet.score = SCORE_ENEMY_PLANET;
 		}
 		planet.score += SCORE_PER_DOCKING_SPOT * planet.docking_spots;
+	}
+}
+
+void UpdateLastTurnTargets()
+{
+	bool isAlived = false;
+	std::vector<hlt::EntityId> pair_need_deleted;
+	for (auto& pair : last_turn_targets)
+	{
+		for (int i = 0; i < player_undocked_ships.size(); ++i)
+		{
+			if (pair.first == player_undocked_ships[i].entity_id)
+			{
+				isAlived = true;
+				break;
+			}
+		}
+
+		if (!isAlived)
+		{
+			pair_need_deleted.push_back(pair.first);
+		}
+	}
+
+	for (int i = 0; i < pair_need_deleted.size(); ++i)
+	{
+		last_turn_targets.erase(pair_need_deleted[i]);
 	}
 }
 

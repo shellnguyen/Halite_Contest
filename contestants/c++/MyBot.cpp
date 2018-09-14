@@ -34,10 +34,12 @@ int main()
 		UpdatePlanetScore();
 		UpdatePlanetList();
 		UpdateShipList();
+		UpdateLastTurnTargets();
 
 		hlt::Log::log("player_ships.size = " + to_string(player_ships.size()));
         for (hlt::Ship& ship : player_ships)
 		{
+			std::pair<hlt::EntityId, hlt::EntityId> ship_target_pair;
 			hlt::Log::log("ship[" + to_string(ship.entity_id) + "]");
 
 			if (ship.docking_status != hlt::ShipDockingStatus::Undocked)
@@ -60,17 +62,18 @@ int main()
 				hlt::Log::log("max number of harass ship : " + to_string(player_undocked_ships.size() / 4));
 				if (nShipHarass <= (player_undocked_ships.size() / 5))
 				{
-					
 					ship.current_target = &nearestEnemy;
-					
 					ship.current_behavior = new Attack();
 					nShipHarass++;
+					ship_target_pair.first = ship.entity_id;
+					ship_target_pair.second = ship.current_target->entity_id;
+					last_turn_targets.insert(ship_target_pair);
 					ship.action();
 					continue;
 				}
 			}
 			hlt::Log::log("not harass");
-			if ((nearestFriendlyPlanet.entity_id != -1) && (ship.location.get_distance_to(nearestEnemy.location) > (ship.location.get_distance_to(nearestFriendlyPlanet.location))))
+			if ((nearestFriendlyPlanet.entity_id != -1) && ((ship.location.get_distance_to(nearestPlanet.location) - ship.location.get_distance_to(nearestFriendlyPlanet.location)) > 15))
 			{
 				hlt::Log::log("planet need protect");
 				ship.current_target = &nearestFriendlyPlanet;
@@ -170,6 +173,9 @@ int main()
 			}
 
 			hlt::Log::log("start action");
+			ship_target_pair.first = ship.entity_id;
+			ship_target_pair.second = ship.current_target->entity_id;
+			last_turn_targets.insert(ship_target_pair);
 			ship.action();
 			hlt::Log::log("end action");
 

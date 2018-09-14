@@ -18,7 +18,7 @@
 #define SCORE_PER_DOCKING_SPOT 6
 
 //Other
-#define MAX_TARGETED 5
+#define MAX_TARGETED 6
 #define MAX_SHIP_DEFEND 3
 #define MAX_SHIP_HARASS 5
 
@@ -28,6 +28,7 @@ extern std::vector<hlt::Ship> enemy_ships, enemy_docked_ship;
 extern std::vector<hlt::Ship> player_ships, player_undocked_ships;
 extern std::vector<hlt::Planet> neutral_planets, enemy_planets, player_planets, non_player_planets;
 extern std::vector<hlt::Move> moves;
+extern std::unordered_map<hlt::EntityId, hlt::EntityId> last_turn_targets;
 extern int nShipHarass;
 
 extern void UpdatePlanetList();
@@ -35,6 +36,7 @@ extern void UpdateShipList();
 extern void UpdateNearbyShip();
 extern void UpdateShipScore();
 extern void UpdatePlanetScore();
+extern void UpdateLastTurnTargets();
 extern hlt::Planet& GetNearestPlanet(hlt::Ship* ship);
 extern hlt::Planet& GetNearestPlayerPlanet(hlt::Ship* ship);
 extern hlt::Ship& GetNearestEnemyShip(hlt::Ship* myShip);
