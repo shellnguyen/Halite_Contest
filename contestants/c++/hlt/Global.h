@@ -18,7 +18,9 @@
 #define SCORE_PER_DOCKING_SPOT 6
 
 //Other
-#define MAX_TARGETED 6
+#define MAX_ATTACK_TARGET 10
+#define MAX_COLONIZE_ENEMY_PLANET 8
+#define MAX_COLONIZE_NEUTRAL_PLANET 6
 #define MAX_SHIP_DEFEND 3
 #define MAX_SHIP_HARASS 5
 
@@ -30,6 +32,10 @@ extern std::vector<hlt::Planet> neutral_planets, enemy_planets, player_planets, 
 extern std::vector<hlt::Move> moves;
 extern std::unordered_map<hlt::EntityId, hlt::EntityId> last_turn_targets;
 extern int nShipHarass;
+extern std::vector<hlt::Planet*> potential_planet_targets;
+extern std::vector<hlt::Ship*> potential_ship_targets;
+extern int current_turn;
+extern bool rush_mode;
 
 extern void UpdatePlanetList();
 extern void UpdateShipList();
@@ -37,12 +43,16 @@ extern void UpdateNearbyShip();
 extern void UpdateShipScore();
 extern void UpdatePlanetScore();
 extern void UpdateLastTurnTargets();
-extern hlt::Planet& GetNearestPlanet(hlt::Ship* ship);
-extern hlt::Planet& GetNearestPlayerPlanet(hlt::Ship* ship);
-extern hlt::Ship& GetNearestEnemyShip(hlt::Ship* myShip);
-extern hlt::Ship& GetNearestDockedEnemyShip(hlt::Ship* myShip);
+extern bool GetNearestPlanet(hlt::Ship* ship);
+extern bool GetNearestPlayerPlanet(hlt::Ship* ship);
+extern bool GetNearestNeutralPlanet(hlt::Ship* ship);
+extern bool GetNearestEnemyPlanet(hlt::Ship* ship);
+extern bool GetNearestPlayerPlanetForDefend(hlt::Ship* ship);
+extern bool GetNearestEnemyShip(hlt::Ship* myShip);
+extern bool GetNearestDockedEnemyShip(hlt::Ship* myShip);
 extern int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly = false);
 extern bool ShouldDockToPlanet(hlt::Planet* planet);
+extern void SortPotentialTargets(hlt::Ship*);
 
 #endif // !GLOBAL_H
 

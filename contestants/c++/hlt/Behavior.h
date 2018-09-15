@@ -13,7 +13,8 @@ enum BehaviorType
 	RUSH = 3,
 	ATTACK = 4,
 	DEFEND = 5,
-	HARASS = 6
+	HARASS = 6,
+	DOCKING = 7
 };
 
 class Behavior

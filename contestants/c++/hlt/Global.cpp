@@ -9,6 +9,10 @@ std::vector<hlt::Planet> neutral_planets, enemy_planets, player_planets, non_pla
 std::vector<hlt::Move> moves;
 std::unordered_map<hlt::EntityId, hlt::EntityId> last_turn_targets; //store ship last turn target id
 int nShipHarass;
+std::vector<hlt::Planet*> potential_planet_targets;
+std::vector<hlt::Ship*> potential_ship_targets;
+int current_turn;
+bool rush_mode;
 
 //Update all list in begining of turn
 void UpdatePlanetList()
@@ -225,7 +229,7 @@ struct CompareShipDistance
 	}
 };
 
-hlt::Planet& GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
+bool GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for colonize
 {
 	hlt::Log::log("GetNearestPlanet");
 	ComparePlanetDistance comp(ship);
@@ -246,21 +250,20 @@ hlt::Planet& GetNearestPlanet(hlt::Ship* ship) //Find nearest planet for coloniz
 			continue;
 		}
 
-		if (planet.targeted >= MAX_TARGETED)
+		if (planet.targeted >= MAX_ATTACK_TARGET)
 		{
 			continue;
 		}
 
-		return planet;
+		potential_planet_targets.push_back(&planet);
+		return true;
 	}
 
 	hlt::Log::log("no planet");
-	hlt::Planet noPlanet;
-	noPlanet.entity_id = -1;
-	return noPlanet;
+	return false;
 }
 
-hlt::Planet& GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Planet that could be target by Enemy
+bool GetNearestPlayerPlanetForDefend(hlt::Ship* ship) //Find nearest Player Planet that could be target by Enemy
 {
 	hlt::Log::log("GetNearestPlanet");
 	ComparePlanetDistance comp(ship);
@@ -275,19 +278,18 @@ hlt::Planet& GetNearestPlayerPlanet(hlt::Ship* ship) //Find nearest Player Plane
 
 		hlt::Log::log("enemy = " + to_string(nEnemy) + ", friendly = " + to_string(nFriendly));
 
-		if ((nEnemy > nFriendly) && ((planet.targeted + nFriendly - nEnemy) < 2) && (planet.targeted < MAX_TARGETED))
+		if ((nEnemy > nFriendly) && ((planet.targeted + nFriendly - nEnemy) < 2) && (planet.targeted < MAX_ATTACK_TARGET))
 		{
-			return planet;
+			potential_planet_targets.push_back(&planet);
+			return true;
 		}
 	}
 
-	hlt::Log::log("no friendly planet");
-	hlt::Planet noPlanet;
-	noPlanet.entity_id = -1;
-	return noPlanet;
+	hlt::Log::log("no friendly planet need defend");
+	return false;
 }
 
-hlt::Ship& GetNearestEnemyShip(hlt::Ship* myShip)
+bool GetNearestEnemyShip(hlt::Ship* myShip)
 {
 	CompareShipDistance comp(myShip);
 	//std::sort(enemy_ships.begin(), enemy_ships.end(), [myShip](hlt::Ship* a, hlt::Ship* b) { return a->location.get_distance_to(myShip->location) < b->location.get_distance_to(myShip->location); });
@@ -297,21 +299,25 @@ hlt::Ship& GetNearestEnemyShip(hlt::Ship* myShip)
 
 	for (hlt::Ship& enemyShip : enemy_ships)
 	{
-		if (!enemyShip.is_alive())
+		if (!enemyShip.is_alive() || enemyShip.docking_status != hlt::ShipDockingStatus::Undocked)
 		{
 			continue;
 		}
 
-		if (enemyShip.targeted > enemyShip.in_range_allies.size() + MAX_TARGETED)
+		if (enemyShip.targeted > enemyShip.in_range_allies.size() + MAX_ATTACK_TARGET)
 		{
 			continue;
 		}
 
-		return enemyShip;
+		potential_ship_targets.push_back(&enemyShip);
+		return true;
 	}
+
+	hlt::Log::log("no enemy ship");
+	return false;
 }
 
-hlt::Ship& GetNearestDockedEnemyShip(hlt::Ship* myShip)
+bool GetNearestDockedEnemyShip(hlt::Ship* myShip)
 {
 	CompareShipDistance comp(myShip);
 	//std::sort(enemy_ships.begin(), enemy_ships.end(), [myShip](hlt::Ship* a, hlt::Ship* b) { return a->location.get_distance_to(myShip->location) < b->location.get_distance_to(myShip->location); });
@@ -326,13 +332,88 @@ hlt::Ship& GetNearestDockedEnemyShip(hlt::Ship* myShip)
 			continue;
 		}
 
-		return enemyShip;
+		potential_ship_targets.push_back(&enemyShip);
+		return true;
 	}
 
 	hlt::Log::log("no enemy docked ship");
-	hlt::Ship noShip;
-	noShip.entity_id = -1;
-	return noShip;
+	return false;
+}
+
+bool GetNearestPlayerPlanet(hlt::Ship* ship)
+{
+	hlt::Log::log("GetNearestPlayerPlanet");
+	ComparePlanetDistance comp(ship);
+
+	std::sort(player_planets.begin(), player_planets.end(), comp);
+
+	for (hlt::Planet& planet : player_planets)
+	{
+		if (planet.is_full())
+		{
+			continue;
+		}
+
+		//if (planet.docking_spots >= planet.targeted)
+		//{
+		//	continue;
+		//}
+
+		potential_planet_targets.push_back(&planet);
+		return true;
+	}
+
+	hlt::Log::log("no player planet");
+	return false;
+}
+
+bool GetNearestNeutralPlanet(hlt::Ship* ship)
+{
+	hlt::Log::log("GetNearestNeutralPlanet");
+	ComparePlanetDistance comp(ship);
+
+	std::sort(neutral_planets.begin(), neutral_planets.end(), comp);
+
+	for (hlt::Planet& planet : neutral_planets)
+	{
+		if (planet.targeted >= planet.docking_spots)
+		{
+			continue;
+		}
+
+		if (planet.targeted >= MAX_COLONIZE_NEUTRAL_PLANET)
+		{
+			continue;
+		}
+
+		potential_planet_targets.push_back(&planet);
+		return true;
+	}
+
+	hlt::Log::log("no neutral planet");
+	return false;
+}
+
+bool GetNearestEnemyPlanet(hlt::Ship* ship)
+{
+	hlt::Log::log("GetNearestEnemyPlanet");
+	ComparePlanetDistance comp(ship);
+
+	std::sort(enemy_planets.begin(), enemy_planets.end(), comp);
+
+	for (hlt::Planet& planet : enemy_planets)
+	{
+		if (planet.targeted >= MAX_COLONIZE_ENEMY_PLANET)
+		{
+			continue;
+		}
+
+		potential_planet_targets.push_back(&planet);
+		return true;
+	}
+
+	hlt::Log::log("no enemy planet");
+	return false;
 }
 
 int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly)
@@ -383,4 +464,22 @@ bool ShouldDockToPlanet(hlt::Planet* planet)
 		}
 	}
 	return false;
+}
+
+void SortPotentialTargets(hlt::Ship* ship)
+{
+	std::sort(potential_planet_targets.begin(), potential_planet_targets.end(), [ship](hlt::Planet* a, hlt::Planet* b) { return (a->getScore() - ship->location.get_distance_to(a->location)) > (b->getScore() - ship->location.get_distance_to(b->location)); });
+	std::sort(potential_ship_targets.begin(), potential_ship_targets.end(), [ship](hlt::Ship* a, hlt::Ship* b) { return (a->getScore() - ship->location.get_distance_to(a->location)) > (b->getScore() - ship->location.get_distance_to(b->location)); });
+
+	for (auto& planet : potential_planet_targets)
+	{
+		hlt::Log::log("planet_target[" + to_string(planet->entity_id) + "].score = " + to_string(planet->getScore()));
+		hlt::Log::log("planet_target[" + to_string(planet->entity_id) + "].distance to ship = " + to_string(ship->location.get_distance_to(planet->location)));
+	}
+
+	for (auto& s : potential_ship_targets)
+	{
+		hlt::Log::log("ship_target[" + to_string(s->entity_id) + "].score = " + to_string(s->getScore()));
+		hlt::Log::log("ship_target[" + to_string(s->entity_id) + "].distance to ship = " + to_string(ship->location.get_distance_to(s->location)));
+	}
 }

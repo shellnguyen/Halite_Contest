@@ -63,6 +63,13 @@ void hlt::Ship::action()
 {
 	if (this->current_behavior)
 	{
+		hlt::Log::log("ship.behavior = " + to_string(this->current_behavior->getType()));
+		if (this->current_target)
+		{
+			hlt::Log::log("ship.targetId = " + to_string(this->current_target->entity_id));
+			hlt::Log::log("ship.targetType = " + to_string(this->current_target->getType()));
+		}
+		
 		if (!this->current_behavior->action(this))
 		{
 			hlt::Log::log("ship[" + to_string(this->entity_id) + "] do action failed !!!");
