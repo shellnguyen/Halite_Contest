@@ -53,6 +53,7 @@ extern bool GetNearestDockedEnemyShip(hlt::Ship* myShip);
 extern int CountShipInRadius(double radius, hlt::Entity* s, bool friendlyOnly = false);
 extern bool ShouldDockToPlanet(hlt::Planet* planet);
 extern void SortPotentialTargets(hlt::Ship*);
+extern bool IsNearestOurDockedShip(hlt::Ship* enemy);
 
 #endif // !GLOBAL_H
 

@@ -483,3 +483,21 @@ void SortPotentialTargets(hlt::Ship* ship)
 		hlt::Log::log("ship_target[" + to_string(s->entity_id) + "].distance to ship = " + to_string(ship->location.get_distance_to(s->location)));
 	}
 }
+
+bool IsNearestOurDockedShip(hlt::Ship* enemy)
+{
+	for (auto& ship : player_ships)
+	{
+		if (ship.docking_status == hlt::ShipDockingStatus::Undocked)
+		{
+			continue;
+		}
+
+		if (enemy->location.get_distance_to(ship.location) <= 25)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
